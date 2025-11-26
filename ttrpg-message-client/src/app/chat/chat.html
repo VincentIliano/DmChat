@@ -1,0 +1,28 @@
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card mt-5">
+        <div class="card-header">
+          <h3 class="text-center">Chat</h3>
+        </div>
+        <div class="card-body">
+          <div class="message-container">
+            <div *ngFor="let message of messages" class="message">
+              <strong>{{ message.user }}:</strong> {{ message.message }}
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <form (ngSubmit)="sendMessage()">
+            <div class="input-group">
+              <input type="text" class="form-control" [(ngModel)]="newMessage" name="newMessage" placeholder="Type a message...">
+              <div class="input-group-append">
+                <button type="submit" class="btn btn-primary">Send</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

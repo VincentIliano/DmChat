@@ -1,0 +1,20 @@
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card mt-5">
+        <div class="card-header">
+          <h3 class="text-center">Join Session</h3>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="onSubmit()">
+            <div class="form-group">
+              <label for="sessionId">Session ID</label>
+              <input type="text" id="sessionId" class="form-control" [(ngModel)]="sessionId" name="sessionId" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block mt-3">Join Session</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

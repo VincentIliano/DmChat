@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
   providedIn: 'root'
 })
 export class SignalrService {
+<<<<<<< HEAD
   private hubConnection: signalR.HubConnection;
   public messageReceived = new Subject<{ user: string, message: string }>();
 
@@ -16,6 +17,18 @@ export class SignalrService {
   }
 
   public startConnection = () => {
+=======
+  private hubConnection: signalR.HubConnection = null!;
+  public messageReceived = new Subject<{ user: string, message: string }>();
+
+  constructor() { }
+
+  public startConnection = (sessionId: string) => {
+    this.hubConnection = new signalR.HubConnectionBuilder()
+      .withUrl(`https://localhost:7038/chathub?sessionId=${sessionId}`)
+      .build();
+
+>>>>>>> feature/ttrpg-app-complete
     this.hubConnection
       .start()
       .then(() => console.log('Connection started'))
@@ -28,8 +41,13 @@ export class SignalrService {
     });
   }
 
+<<<<<<< HEAD
   public sendMessage = (user: string, message: string) => {
     this.hubConnection.invoke('SendMessage', user, message)
+=======
+  public sendMessage = (sessionId: string, user: string, message: string) => {
+    this.hubConnection.invoke('SendMessage', sessionId, user, message)
+>>>>>>> feature/ttrpg-app-complete
       .catch(err => console.error(err));
   }
 }

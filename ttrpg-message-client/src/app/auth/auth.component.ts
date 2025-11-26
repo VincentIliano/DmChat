@@ -27,7 +27,7 @@ export class AuthComponent {
       this.authService.login({ username: this.username, password: this.password })
         .subscribe((response: any) => {
           localStorage.setItem('token', response.token);
-          this.router.navigate(['/join-session']);
+          this.router.navigate(['/dm-dashboard']);
         });
     } else {
       this.authService.register({ username: this.username, password: this.password })

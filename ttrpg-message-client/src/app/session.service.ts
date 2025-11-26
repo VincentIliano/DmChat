@@ -13,4 +13,12 @@ export class SessionService {
   joinSession(sessionId: string, characterName: string): Observable<any> {
     return this.http.post(`${this.baseUrl}/join`, { sessionId, characterName });
   }
+
+  createSession(sessionName: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/create`, `"${sessionName}"`, { headers: { 'Content-Type': 'application/json' } });
+  }
+
+  getSessions(): Observable<any> {
+    return this.http.get(this.baseUrl);
+  }
 }

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TtrpgMessageApi.Data;
 using TtrpgMessageApi.Hubs;
+using TtrpgMessageApi.Models;
 using TtrpgMessageApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);

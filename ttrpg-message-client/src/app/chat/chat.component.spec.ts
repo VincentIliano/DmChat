@@ -19,7 +19,8 @@ describe('ChatComponent', () => {
               paramMap: {
                 get: () => '1' // provide a mock session ID
               }
-            }
+            },
+            queryParams: of({ playerId: 1, characterName: 'TestChar' })
           }
         }
       ]

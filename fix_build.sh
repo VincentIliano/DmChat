@@ -23,15 +23,15 @@ if [ -z "$CLIENT_DIR" ]; then
 else
     echo "👉 Found frontend in: $CLIENT_DIR"
     cd "$CLIENT_DIR"
-
+    
     # This prevents the build from hanging on "Optional" skipping or user prompts
     echo "Running npm install..."
     npm install --no-audit --prefer-offline
-
+    
     # Optional: Pre-build the Angular app to catch errors early
     # echo "Building Angular app..."
     # npm run build
-
+    
     cd - > /dev/null
     echo "✅ Frontend dependencies installed."
 fi
@@ -47,7 +47,7 @@ echo "--- 🏗️  BUILDING .NET BACKEND ---"
 dotnet restore --verbosity normal
 dotnet build --no-incremental --verbosity normal
 
-echo "--- 🚀 STARTING APP ---"
-echo "Starting application interactively. Press Ctrl+C to stop."
+# echo "--- 🚀 STARTING APP ---"
+# echo "Starting application interactively. Press Ctrl+C to stop."
 # Runs the app directly so logs stream to the console instantly (no buffering)
-dotnet run --project TtrpgMessageApi --urls "https://localhost:7139;http://localhost:5000"
+# dotnet run --project TtrpgMessageApi --urls "https://localhost:7139;http://localhost:5000"

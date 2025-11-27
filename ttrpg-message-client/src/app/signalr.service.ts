@@ -15,20 +15,15 @@ export class SignalrService {
       .build();
   }
 
-  public startConnection = () => {
-  private hubConnection: signalR.HubConnection = null!;
-  public messageReceived = new Subject<{ user: string, message: string }>();
-
-  constructor() { }
-
-  public startConnection = (sessionId: string) => {
-    this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(`https://localhost:7038/chathub?sessionId=${sessionId}`)
-      .build();
-
+  public startConnection = (sessionId: string, playerId: number) => {
     this.hubConnection
       .start()
-      .then(() => console.log('Connection started'))
+      .then(() => {
+          console.log('Connection started');
+          // Immediately invoke JoinSession after connecting
+          this.hubConnection.invoke('JoinSession', sessionId, playerId)
+            .catch(err => console.error('Error joining session:', err));
+      })
       .catch(err => console.log('Error while starting connection: ' + err));
   }
 
@@ -38,10 +33,8 @@ export class SignalrService {
     });
   }
 
-  public sendMessage = (sessionId: string, user: string, message: string) => {
-    this.hubConnection.invoke('SendMessage', sessionId, user, message)
-  public sendMessage = (user: string, message: string) => {
-    this.hubConnection.invoke('SendMessage', user, message)
+  public sendMessage = (sessionId: string, user: string, message: string, playerId: number, isDm: boolean) => {
+    this.hubConnection.invoke('SendMessage', sessionId, user, message, playerId, isDm)
       .catch(err => console.error(err));
   }
 }

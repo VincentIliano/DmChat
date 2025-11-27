@@ -34,6 +34,7 @@ namespace TtrpgMessageApi.Hubs
 
                 // Load history
                 var messages = await _context.Messages
+                    .AsNoTracking()
                     .Where(m => m.SessionId == int.Parse(sessionId) && m.PlayerId == playerId)
                     .OrderBy(m => m.Timestamp)
                     .Select(m => new {
@@ -42,11 +43,17 @@ namespace TtrpgMessageApi.Hubs
                     })
                     .ToListAsync();
 
+                Console.WriteLine($"[JoinSession] Loaded {messages.Count} messages for Session {sessionId}, Player {playerId}.");
+
                 // Send history to caller
                 foreach (var msg in messages)
                 {
                     await Clients.Caller.SendAsync("ReceiveMessage", msg.user, msg.message);
                 }
+            }
+            else
+            {
+                Console.WriteLine($"[JoinSession] Player {playerId} not found.");
             }
         }
 
@@ -73,7 +80,17 @@ namespace TtrpgMessageApi.Hubs
             };
 
             _context.Messages.Add(msgEntity);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+                Console.WriteLine($"[SendMessage] Saved message ID {msgEntity.Id} to DB.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SendMessage] Error saving to DB: {ex.Message}");
+                // We proceed to send the message via SignalR even if persistence fails,
+                // but logging the error helps diagnosis.
+            }
 
             // Routing Logic
             string playerGroup = $"Player_{playerId}";

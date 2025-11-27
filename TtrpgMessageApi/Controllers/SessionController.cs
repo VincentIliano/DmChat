@@ -10,7 +10,6 @@ using TtrpgMessageApi.Models;
 
 namespace TtrpgMessageApi.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class SessionController : ControllerBase
@@ -22,6 +21,7 @@ namespace TtrpgMessageApi.Controllers
             _context = context;
         }
 
+        [Authorize]
         [HttpPost("create")]
         public async Task<IActionResult> CreateSession([FromBody] string sessionName)
         {
@@ -45,7 +45,6 @@ namespace TtrpgMessageApi.Controllers
             }
         }
 
-        [AllowAnonymous]
         [HttpPost("join")]
         public async Task<IActionResult> JoinSession([FromBody] JoinSessionRequest request)
         {
@@ -83,6 +82,7 @@ namespace TtrpgMessageApi.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetSessions()
         {

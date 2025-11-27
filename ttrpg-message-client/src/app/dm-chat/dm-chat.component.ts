@@ -75,6 +75,7 @@ export class DmChatComponent implements OnInit {
 
   sendMessage() {
     if (this.newMessage.trim() && this.selectedPlayerId) {
+      // Updated signature: user and isDm are ignored by service/backend
       this.signalrService.sendMessage(
         this.sessionId,
         this.dmName,

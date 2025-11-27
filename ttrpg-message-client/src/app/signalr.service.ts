@@ -16,55 +16,29 @@ export class SignalrService {
   }
 
   public startConnection = (sessionId: string, playerId: number) => {
-    if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
-        this.invokeJoinSession(sessionId, playerId);
-    } else if (this.hubConnection.state === signalR.HubConnectionState.Disconnected) {
-        this.hubConnection
-          .start()
-          .then(() => {
-              console.log('Connection started');
-              // Immediately invoke JoinSession after connecting
-              this.invokeJoinSession(sessionId, playerId);
-          })
-          .catch(err => console.log('Error while starting connection: ' + err));
-    }
-    // If Connecting or Reconnecting, we might want to wait, but for now this handles the main issue.
-  }
-
-  private invokeJoinSession(sessionId: string, playerId: number) {
-      this.hubConnection.invoke('JoinSession', sessionId, playerId)
-        .catch(err => console.error('Error joining session:', err));
-    if (this.hubConnection.state === signalR.HubConnectionState.Disconnected) {
-      this.hubConnection
-        .start()
-        .then(() => {
-            console.log('Connection started');
-            this.hubConnection.invoke('JoinSession', sessionId, playerId)
-              .catch(err => console.error('Error joining session:', err));
-        })
-        .catch(err => console.log('Error while starting connection: ' + err));
-    } else {
-      // Already connected, just invoke logic
-      this.hubConnection.invoke('JoinSession', sessionId, playerId)
-        .catch(err => console.error('Error joining session:', err));
-    }
+      this.ensureConnection().then(() => {
+          this.hubConnection.invoke('JoinSession', sessionId, playerId)
+            .catch(err => console.error('Error joining session:', err));
+      }).catch(err => console.error('Connection failed', err));
   }
 
   public startDmConnection = (sessionId: string) => {
-    if (this.hubConnection.state === signalR.HubConnectionState.Disconnected) {
-      this.hubConnection
-        .start()
-        .then(() => {
-            console.log('DM Connection started');
-            this.hubConnection.invoke('RegisterDmConnection', sessionId)
-              .catch(err => console.error('Error registering DM connection:', err));
-        })
-        .catch(err => console.log('Error while starting DM connection: ' + err));
-    } else {
-       // Already connected, just invoke logic
-       this.hubConnection.invoke('RegisterDmConnection', sessionId)
-         .catch(err => console.error('Error registering DM connection:', err));
-    }
+      this.ensureConnection().then(() => {
+          this.hubConnection.invoke('RegisterDmConnection', sessionId)
+            .catch(err => console.error('Error registering DM connection:', err));
+      }).catch(err => console.error('Connection failed', err));
+  }
+
+  private ensureConnection(): Promise<void> {
+      if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
+          return Promise.resolve();
+      }
+      if (this.hubConnection.state === signalR.HubConnectionState.Disconnected) {
+          return this.hubConnection.start();
+      }
+      // If connecting, wait a bit or reject? For now, we assume simple retry or let the caller handle it.
+      // A robust implementation would wait for the connecting state to resolve.
+      return Promise.reject('Connection is in intermediate state: ' + this.hubConnection.state);
   }
 
   public addMessageListener = () => {
@@ -74,7 +48,11 @@ export class SignalrService {
   }
 
   public sendMessage = (sessionId: string, user: string, message: string, playerId: number, isDm: boolean) => {
-    this.hubConnection.invoke('SendMessage', sessionId, user, message, playerId, isDm)
-      .catch(err => console.error(err));
+      // Logic fix: The backend now determines user/isDm. We just send content and target.
+      // But we need to match the backend signature.
+      // Backend: SendMessage(string sessionId, string message, int targetPlayerId)
+
+      this.hubConnection.invoke('SendMessage', sessionId, message, playerId)
+        .catch(err => console.error(err));
   }
 }

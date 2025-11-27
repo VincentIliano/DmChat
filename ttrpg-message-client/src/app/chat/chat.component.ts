@@ -68,6 +68,7 @@ export class ChatComponent implements OnInit {
 
   sendMessage() {
     if (this.newMessage.trim()) {
+        // Updated signature: user and isDm are ignored by service/backend
         this.signalrService.sendMessage(this.sessionId, this.user, this.newMessage, this.playerId, false);
         this.newMessage = '';
     }

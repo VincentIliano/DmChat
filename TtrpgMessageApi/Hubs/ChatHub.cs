@@ -39,7 +39,8 @@ namespace TtrpgMessageApi.Hubs
                     .OrderBy(m => m.Timestamp)
                     .Select(m => new {
                         user = m.SenderName,
-                        message = m.Content
+                        message = m.Content,
+                        isFromDm = m.IsFromDm
                     })
                     .ToListAsync();
 
@@ -48,7 +49,7 @@ namespace TtrpgMessageApi.Hubs
                 // Send history to caller
                 foreach (var msg in messages)
                 {
-                    await Clients.Caller.SendAsync("ReceiveMessage", msg.user, msg.message);
+                    await Clients.Caller.SendAsync("ReceiveMessage", msg.user, msg.message, playerId, msg.isFromDm);
                 }
             }
             else
@@ -60,9 +61,42 @@ namespace TtrpgMessageApi.Hubs
         // Called by DM to listen to a session
         public async Task RegisterDmConnection(string sessionId)
         {
-            // Verify if caller is DM? For now, we assume authenticated DM calls this.
-            // In a real app we'd check Context.User
+            int sId = int.Parse(sessionId);
+
+            // Security check: Ensure the caller is the DM of this session
+            // Assuming the token contains the DM's user ID as NameIdentifier
+            var userIdStr = Context.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdStr))
+            {
+                throw new HubException("Unauthorized: No user identifier found.");
+            }
+
+            int dmId = int.Parse(userIdStr);
+            var session = await _context.Sessions.FindAsync(sId);
+
+            if (session == null || session.DMId != dmId)
+            {
+                throw new HubException("Unauthorized: You are not the DM of this session.");
+            }
+
             await Groups.AddToGroupAsync(Context.ConnectionId, $"Session_{sessionId}_DM");
+
+            var messages = await _context.Messages
+                .AsNoTracking()
+                .Where(m => m.SessionId == sId)
+                .OrderBy(m => m.Timestamp)
+                .Select(m => new {
+                    user = m.SenderName,
+                    message = m.Content,
+                    playerId = m.PlayerId,
+                    isFromDm = m.IsFromDm
+                })
+                .ToListAsync();
+
+            foreach (var msg in messages)
+            {
+                await Clients.Caller.SendAsync("ReceiveMessage", msg.user, msg.message, msg.playerId, msg.isFromDm);
+            }
         }
 
         public async Task SendMessage(string sessionId, string user, string message, int playerId, bool isDm)
@@ -97,22 +131,9 @@ namespace TtrpgMessageApi.Hubs
             string playerGroup = $"Player_{playerId}";
             string dmGroup = $"Session_{sessionId}_DM";
 
-            if (isDm)
-            {
-                // DM sending to Player
-                // Send to Player
-                await Clients.Group(playerGroup).SendAsync("ReceiveMessage", user, message);
-                // Send back to DM (caller) or all DMs for this session
-                await Clients.Group(dmGroup).SendAsync("ReceiveMessage", user, message);
-            }
-            else
-            {
-                // Player sending to DM
-                // Send to DM group
-                await Clients.Group(dmGroup).SendAsync("ReceiveMessage", user, message);
-                // Send back to Player (caller)
-                await Clients.Caller.SendAsync("ReceiveMessage", user, message);
-            }
+            // Broadcast to both groups with the full payload
+            await Clients.Group(playerGroup).SendAsync("ReceiveMessage", user, message, playerId, isDm);
+            await Clients.Group(dmGroup).SendAsync("ReceiveMessage", user, message, playerId, isDm);
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)

@@ -100,6 +100,43 @@ namespace TtrpgMessageApi.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [Authorize]
+        [HttpGet("{sessionId}/players")]
+        public async Task<IActionResult> GetPlayers(int sessionId)
+        {
+            try
+            {
+                var dmId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var session = await _context.Sessions.FindAsync(sessionId);
+
+                if (session == null)
+                {
+                    return NotFound("Session not found");
+                }
+
+                if (session.DMId != dmId)
+                {
+                    return Unauthorized("You are not the DM for this session");
+                }
+
+                var players = await _context.Players
+                    .Where(p => p.SessionId == sessionId)
+                    .Include(p => p.Character)
+                    .Select(p => new
+                    {
+                        id = p.Id,
+                        characterName = p.Character.Name
+                    })
+                    .ToListAsync();
+
+                return Ok(players);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 
     public class JoinSessionRequest

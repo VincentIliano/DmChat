@@ -21,4 +21,8 @@ export class SessionService {
   getSessions(): Observable<any> {
     return this.http.get(this.baseUrl);
   }
+
+  getPlayers(sessionId: number) {
+    return this.http.get(`${this.baseUrl}/${sessionId}/players`);
+  }
 }

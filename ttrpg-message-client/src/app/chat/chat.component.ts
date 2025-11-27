@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SignalrService } from '../signalr.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -17,14 +17,37 @@ export class ChatComponent implements OnInit {
   sessionId: string = '';
   playerId: number = 0;
 
-  constructor(private signalrService: SignalrService, private route: ActivatedRoute) { }
+  constructor(private signalrService: SignalrService, private route: ActivatedRoute, private router: Router) { }
 
   ngOnInit(): void {
     this.sessionId = this.route.snapshot.paramMap.get('sessionId')!;
     this.route.queryParams.subscribe(params => {
-        this.playerId = +params['playerId'];
-        if (params['characterName']) {
-          this.user = params['characterName'];
+        let playerIdParam = params['playerId'];
+        let characterNameParam = params['characterName'];
+
+        if (playerIdParam) {
+           this.playerId = +playerIdParam;
+           if (characterNameParam) {
+             this.user = characterNameParam;
+           }
+
+           // Update localStorage with fresh data from URL if available
+           localStorage.setItem('ttrpg_session', JSON.stringify({
+             sessionId: this.sessionId,
+             playerId: this.playerId,
+             characterName: this.user
+           }));
+        } else {
+           // Try to load from localStorage
+           const stored = localStorage.getItem('ttrpg_session');
+           if (stored) {
+             const sessionData = JSON.parse(stored);
+             // Ensure the stored session matches the current URL session
+             if (sessionData.sessionId == this.sessionId) {
+               this.playerId = sessionData.playerId;
+               this.user = sessionData.characterName;
+             }
+           }
         }
 
         if (this.playerId) {
@@ -36,6 +59,9 @@ export class ChatComponent implements OnInit {
               // The Chat component expects { user, message } which is compatible.
               this.messages.push(data);
             });
+        } else {
+            // No player ID found in URL or Storage - redirect to join
+            this.router.navigate(['/join']);
         }
     });
   }

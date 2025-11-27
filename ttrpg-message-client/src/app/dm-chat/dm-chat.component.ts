@@ -90,4 +90,9 @@ export class DmChatComponent implements OnInit {
     if (!this.selectedPlayerId) return [];
     return this.chats[this.selectedPlayerId] || [];
   }
+
+  getSelectedPlayerName(): string {
+    const player = this.players.find(p => p.id === this.selectedPlayerId);
+    return player ? player.characterName : '';
+  }
 }

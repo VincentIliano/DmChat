@@ -10,8 +10,8 @@ export class SessionService {
 
   constructor(private http: HttpClient) { }
 
-  joinSession(sessionId: string, characterName: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/join`, { sessionId, characterName });
+  joinSession(sessionId: string, characterName: string, password?: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/join`, { sessionId, characterName, password });
   }
 
   createSession(sessionName: string): Observable<any> {

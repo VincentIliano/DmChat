@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TtrpgMessageApi.Data;
 
@@ -11,9 +12,11 @@ using TtrpgMessageApi.Data;
 namespace TtrpgMessageApi.Migrations
 {
     [DbContext(typeof(TtrpgMessageDbContext))]
-    partial class TtrpgMessageDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251127150932_AddPlayerPassword")]
+    partial class AddPlayerPassword
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

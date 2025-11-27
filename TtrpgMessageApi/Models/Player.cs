@@ -7,4 +7,5 @@ public class Player
     public int SessionId { get; set; }
     public Session Session { get; set; }
     public Character Character { get; set; }
+    public string Password { get; set; }
 }

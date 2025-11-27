@@ -80,15 +80,21 @@ namespace TtrpgMessageApi.Controllers
                 };
 
                 _context.Players.Add(player);
-                await _context.SaveChangesAsync();
+                // Transactional Save
+                // Ideally we'd use a transaction scope, but adding to context and saving once is atomic enough for EF Core
+                // IF we set up the relationships correctly.
+                // However, Character needs PlayerId.
+                // EF Core can handle this if we add to the Player's collection or set the navigation property.
 
                 var character = new Character
                 {
                     Name = request.CharacterName,
-                    PlayerId = player.Id
+                    Player = player // Link via navigation property
                 };
 
                 _context.Characters.Add(character);
+
+                // Single SaveChanges validates the entire graph
                 await _context.SaveChangesAsync();
 
                 return Ok(new { playerId = player.Id, characterId = character.Id });

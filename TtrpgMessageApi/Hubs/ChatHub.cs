@@ -122,8 +122,9 @@ namespace TtrpgMessageApi.Hubs
             catch (Exception ex)
             {
                 Console.WriteLine($"[SendMessage] Error saving to DB: {ex.Message}");
-                // We proceed to send the message via SignalR even if persistence fails,
-                // but logging the error helps diagnosis.
+                // Log the full exception for server-side debugging
+                Console.WriteLine(ex);
+                throw new HubException("Failed to save message to database.");
             }
 
             // Routing Logic

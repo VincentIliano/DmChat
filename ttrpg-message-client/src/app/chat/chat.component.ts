@@ -31,6 +31,9 @@ export class ChatComponent implements OnInit {
             this.signalrService.startConnection(this.sessionId, this.playerId);
             this.signalrService.addMessageListener();
             this.signalrService.messageReceived.subscribe((data: any) => {
+              // Push the message object directly.
+              // The backend now sends { user, message, playerId, isFromDm }
+              // The Chat component expects { user, message } which is compatible.
               this.messages.push(data);
             });
         }

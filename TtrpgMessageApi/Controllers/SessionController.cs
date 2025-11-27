@@ -21,17 +21,32 @@ namespace TtrpgMessageApi.Controllers
             _context = context;
         }
 
+        private int? GetUserId()
+        {
+            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)
+                          ?? User.FindFirst("nameid")
+                          ?? User.FindFirst("sub");
+
+            if (idClaim != null && int.TryParse(idClaim.Value, out int userId))
+            {
+                return userId;
+            }
+            return null;
+        }
+
         [Authorize]
         [HttpPost("create")]
         public async Task<IActionResult> CreateSession([FromBody] string sessionName)
         {
             try
             {
-                var dmId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var dmId = GetUserId();
+                if (dmId == null) return Unauthorized("Invalid user token");
+
                 var session = new Session
                 {
                     Name = sessionName,
-                    DMId = dmId
+                    DMId = dmId.Value
                 };
 
                 _context.Sessions.Add(session);
@@ -111,9 +126,11 @@ namespace TtrpgMessageApi.Controllers
         {
             try
             {
-                var dmId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var dmId = GetUserId();
+                if (dmId == null) return Unauthorized("Invalid user token");
+
                 var sessions = await _context.Sessions
-                    .Where(s => s.DMId == dmId)
+                    .Where(s => s.DMId == dmId.Value)
                     .ToListAsync();
 
                 return Ok(sessions);
@@ -130,7 +147,9 @@ namespace TtrpgMessageApi.Controllers
         {
             try
             {
-                var dmId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var dmId = GetUserId();
+                if (dmId == null) return Unauthorized("Invalid user token");
+
                 var session = await _context.Sessions.FindAsync(sessionId);
 
                 if (session == null)
@@ -138,7 +157,7 @@ namespace TtrpgMessageApi.Controllers
                     return NotFound("Session not found");
                 }
 
-                if (session.DMId != dmId)
+                if (session.DMId != dmId.Value)
                 {
                     return Unauthorized("You are not the DM for this session");
                 }

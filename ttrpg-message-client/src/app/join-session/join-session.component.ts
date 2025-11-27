@@ -19,7 +19,13 @@ export class JoinSessionComponent {
   onSubmit() {
     this.sessionService.joinSession(this.sessionId, this.characterName)
       .subscribe((response: any) => {
-        this.router.navigate(['/chat', this.sessionId]);
+        // response contains { playerId, characterId }
+        this.router.navigate(['/chat', this.sessionId], {
+            queryParams: {
+                playerId: response.playerId,
+                characterName: this.characterName
+            }
+        });
       });
   }
 }

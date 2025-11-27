@@ -13,22 +13,34 @@ import { CommonModule } from '@angular/common';
 export class ChatComponent implements OnInit {
   messages: { user: string, message: string }[] = [];
   newMessage = '';
-  user = 'Player'; // Placeholder for the current user
+  user = 'Player';
   sessionId: string = '';
+  playerId: number = 0;
 
   constructor(private signalrService: SignalrService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
     this.sessionId = this.route.snapshot.paramMap.get('sessionId')!;
-    this.signalrService.startConnection(this.sessionId);
-    this.signalrService.addMessageListener();
-    this.signalrService.messageReceived.subscribe((data: any) => {
-      this.messages.push(data);
+    this.route.queryParams.subscribe(params => {
+        this.playerId = +params['playerId'];
+        if (params['characterName']) {
+          this.user = params['characterName'];
+        }
+
+        if (this.playerId) {
+            this.signalrService.startConnection(this.sessionId, this.playerId);
+            this.signalrService.addMessageListener();
+            this.signalrService.messageReceived.subscribe((data: any) => {
+              this.messages.push(data);
+            });
+        }
     });
   }
 
   sendMessage() {
-    this.signalrService.sendMessage(this.sessionId, this.user, this.newMessage);
-    this.newMessage = '';
+    if (this.newMessage.trim()) {
+        this.signalrService.sendMessage(this.sessionId, this.user, this.newMessage, this.playerId, false);
+        this.newMessage = '';
+    }
   }
 }

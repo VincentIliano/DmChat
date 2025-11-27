@@ -45,6 +45,7 @@ namespace TtrpgMessageApi.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost("join")]
         public async Task<IActionResult> JoinSession([FromBody] JoinSessionRequest request)
         {

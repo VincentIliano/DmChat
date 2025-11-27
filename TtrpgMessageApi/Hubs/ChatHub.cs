@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.SignalR;
 using System.Threading.Tasks;
 using TtrpgMessageApi.Data;
+using TtrpgMessageApi.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 
 namespace TtrpgMessageApi.Hubs
 {
@@ -15,19 +17,83 @@ namespace TtrpgMessageApi.Hubs
             _context = context;
         }
 
-        public async Task SendMessage(string sessionId, string user, string message)
-        {
-            await Clients.Group(sessionId).SendAsync("ReceiveMessage", user, message);
-        }
-
         public async Task JoinSession(string sessionId, int playerId)
         {
-            var player = await _context.Players.FindAsync(playerId);
+            var player = await _context.Players
+                .Include(p => p.Character)
+                .FirstOrDefaultAsync(p => p.Id == playerId);
+
             if (player != null)
             {
                 player.ConnectionId = Context.ConnectionId;
                 await _context.SaveChangesAsync();
-                await Groups.AddToGroupAsync(Context.ConnectionId, sessionId);
+
+                // Player joins their own private group
+                var playerGroup = $"Player_{playerId}";
+                await Groups.AddToGroupAsync(Context.ConnectionId, playerGroup);
+
+                // Load history
+                var messages = await _context.Messages
+                    .Where(m => m.SessionId == int.Parse(sessionId) && m.PlayerId == playerId)
+                    .OrderBy(m => m.Timestamp)
+                    .Select(m => new {
+                        user = m.SenderName,
+                        message = m.Content
+                    })
+                    .ToListAsync();
+
+                // Send history to caller
+                foreach (var msg in messages)
+                {
+                    await Clients.Caller.SendAsync("ReceiveMessage", msg.user, msg.message);
+                }
+            }
+        }
+
+        // Called by DM to listen to a session
+        public async Task RegisterDmConnection(string sessionId)
+        {
+            // Verify if caller is DM? For now, we assume authenticated DM calls this.
+            // In a real app we'd check Context.User
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"Session_{sessionId}_DM");
+        }
+
+        public async Task SendMessage(string sessionId, string user, string message, int playerId, bool isDm)
+        {
+            int sId = int.Parse(sessionId);
+
+            var msgEntity = new Message
+            {
+                Content = message,
+                SessionId = sId,
+                PlayerId = playerId,
+                SenderName = user,
+                IsFromDm = isDm,
+                Timestamp = DateTime.UtcNow
+            };
+
+            _context.Messages.Add(msgEntity);
+            await _context.SaveChangesAsync();
+
+            // Routing Logic
+            string playerGroup = $"Player_{playerId}";
+            string dmGroup = $"Session_{sessionId}_DM";
+
+            if (isDm)
+            {
+                // DM sending to Player
+                // Send to Player
+                await Clients.Group(playerGroup).SendAsync("ReceiveMessage", user, message);
+                // Send back to DM (caller) or all DMs for this session
+                await Clients.Group(dmGroup).SendAsync("ReceiveMessage", user, message);
+            }
+            else
+            {
+                // Player sending to DM
+                // Send to DM group
+                await Clients.Group(dmGroup).SendAsync("ReceiveMessage", user, message);
+                // Send back to Player (caller)
+                await Clients.Caller.SendAsync("ReceiveMessage", user, message);
             }
         }
 

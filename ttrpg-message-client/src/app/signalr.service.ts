@@ -16,15 +16,24 @@ export class SignalrService {
   }
 
   public startConnection = (sessionId: string, playerId: number) => {
-    this.hubConnection
-      .start()
-      .then(() => {
-          console.log('Connection started');
-          // Immediately invoke JoinSession after connecting
-          this.hubConnection.invoke('JoinSession', sessionId, playerId)
-            .catch(err => console.error('Error joining session:', err));
-      })
-      .catch(err => console.log('Error while starting connection: ' + err));
+    if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
+        this.invokeJoinSession(sessionId, playerId);
+    } else if (this.hubConnection.state === signalR.HubConnectionState.Disconnected) {
+        this.hubConnection
+          .start()
+          .then(() => {
+              console.log('Connection started');
+              // Immediately invoke JoinSession after connecting
+              this.invokeJoinSession(sessionId, playerId);
+          })
+          .catch(err => console.log('Error while starting connection: ' + err));
+    }
+    // If Connecting or Reconnecting, we might want to wait, but for now this handles the main issue.
+  }
+
+  private invokeJoinSession(sessionId: string, playerId: number) {
+      this.hubConnection.invoke('JoinSession', sessionId, playerId)
+        .catch(err => console.error('Error joining session:', err));
   }
 
   public addMessageListener = () => {

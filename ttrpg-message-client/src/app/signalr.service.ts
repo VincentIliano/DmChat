@@ -11,7 +11,9 @@ export class SignalrService {
 
   constructor() {
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl('https://localhost:7038/chathub')
+      .withUrl('https://localhost:7038/chathub', {
+        accessTokenFactory: () => localStorage.getItem('token') || ''
+      })
       .build();
   }
 

@@ -56,10 +56,27 @@ namespace TtrpgMessageApi.Controllers
                     return NotFound("Session not found");
                 }
 
+                // Check if a player with this character name already exists in this session
+                var existingPlayer = await _context.Players
+                    .Include(p => p.Character)
+                    .FirstOrDefaultAsync(p => p.SessionId == request.SessionId && p.Character.Name == request.CharacterName);
+
+                if (existingPlayer != null)
+                {
+                    // Check password
+                    if (existingPlayer.Password != request.Password)
+                    {
+                        return Unauthorized("Invalid password for this character.");
+                    }
+
+                    return Ok(new { playerId = existingPlayer.Id, characterId = existingPlayer.Character.Id });
+                }
+
                 var player = new Player
                 {
                     ConnectionId = "", // This will be updated by SignalR
-                    SessionId = request.SessionId
+                    SessionId = request.SessionId,
+                    Password = request.Password
                 };
 
                 _context.Players.Add(player);
@@ -143,5 +160,6 @@ namespace TtrpgMessageApi.Controllers
     {
         public int SessionId { get; set; }
         public string CharacterName { get; set; }
+        public string Password { get; set; }
     }
 }

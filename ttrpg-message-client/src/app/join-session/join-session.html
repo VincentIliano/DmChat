@@ -11,6 +11,17 @@
               <label for="sessionId">Session ID</label>
               <input type="text" id="sessionId" class="form-control" [(ngModel)]="sessionId" name="sessionId" required>
             </div>
+            <div class="form-group mt-2">
+              <label for="characterName">Character Name</label>
+              <input type="text" id="characterName" class="form-control" [(ngModel)]="characterName" name="characterName" required>
+            </div>
+            <div class="form-group mt-2">
+              <label for="password">Password (to resume session later)</label>
+              <input type="password" id="password" class="form-control" [(ngModel)]="password" name="password" required>
+            </div>
+            <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+              {{ errorMessage }}
+            </div>
             <button type="submit" class="btn btn-primary btn-block mt-3">Join Session</button>
           </form>
         </div>

@@ -28,6 +28,11 @@ export class DmChatComponent implements OnInit {
 
   ngOnInit(): void {
     this.sessionId = this.route.snapshot.paramMap.get('sessionId')!;
+    if (!this.sessionId) {
+      console.error('Session ID not found in route parameters');
+      return;
+    }
+
     this.loadPlayers();
 
     this.signalrService.startDmConnection(this.sessionId);
@@ -43,19 +48,27 @@ export class DmChatComponent implements OnInit {
   }
 
   loadPlayers() {
-    this.sessionService.getPlayers(+this.sessionId).subscribe((data: any) => {
-      this.players = data;
-      // Initialize chat buffers for all players
-      this.players.forEach(p => {
-        if (!this.chats[p.id]) {
-          this.chats[p.id] = [];
-          this.unreadCounts[p.id] = 0;
-        }
-      });
+    console.log('Loading players for session:', this.sessionId);
+    this.sessionService.getPlayers(+this.sessionId).subscribe({
+      next: (data: any) => {
+        console.log('Players loaded:', data);
+        this.players = data;
+        // Initialize chat buffers for all players
+        this.players.forEach(p => {
+          if (!this.chats[p.id]) {
+            this.chats[p.id] = [];
+            this.unreadCounts[p.id] = 0;
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Error loading players:', err);
+      }
     });
   }
 
   handlePlayerJoined(player: { id: number, characterName: string }) {
+    console.log('Player joined:', player);
     // Check if player already exists
     if (!this.players.some(p => p.id === player.id)) {
       this.players.push(player);
@@ -67,6 +80,7 @@ export class DmChatComponent implements OnInit {
   }
 
   handleIncomingMessage(data: { user: string, message: string, playerId: number, isFromDm: boolean }) {
+    console.log('Incoming message:', data);
     const pId = data.playerId;
     if (!this.chats[pId]) {
       this.chats[pId] = [];

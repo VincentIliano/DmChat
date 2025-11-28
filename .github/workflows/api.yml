@@ -1,36 +1,24 @@
-name: .NET API Pipeline
-
+name: API Pipeline
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 'api/**' # Assumes your API code is in an 'api' folder
+    paths: [ "TtrpgMessageApi/**" ] # Only run if API code changes
 
 jobs:
-  build-and-test:
+  deploy-api:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./api
-
+    defaults: { run: { working-directory: ./TtrpgMessageApi } }
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: 8.0.x }
+      
+      - name: Build & Test
+        run: |
+          dotnet restore
+          dotnet build --no-restore
+          dotnet test --no-build
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x 
-
-    - name: Restore Dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --no-restore
-
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
-
-    - name: Trigger Render Deploy
-      # Only runs if tests passed
-      if: success() 
-      run: curl "${{ secrets.RENDER_DEPLOY_HOOK }}"
+      - name: Trigger Render Deploy
+        if: success()
+        run: curl "${{ secrets.RENDER_DEPLOY_HOOK }}"

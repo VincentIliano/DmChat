@@ -67,11 +67,22 @@ builder.Services.AddAuthentication(x =>
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddSignalR();
 
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+if (allowedOrigins == null || allowedOrigins.Length == 0)
+{
+    allowedOrigins = new[]
+    {
+        "http://localhost:4200",
+        "https://dm-chat-rmqcr8lco-vincents-projects-838544f9.vercel.app",
+        "https://dm-chat-olive.vercel.app"
+    };
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policyBuilder =>
     {
-        policyBuilder.WithOrigins("http://localhost:4200", "https://dm-chat-rmqcr8lco-vincents-projects-838544f9.vercel.app", "https://dm-chat-olive.vercel.app")
+        policyBuilder.WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();

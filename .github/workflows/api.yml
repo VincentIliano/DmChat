@@ -27,8 +27,8 @@ jobs:
           dotnet test --no-build
 
       # 1. Install the EF Core Tool (It's not installed by default on runners)
-      - name: Install EF Core Tool
-        run: dotnet tool install --global dotnet-ef
+      - name: Restore Local Tools
+        run: dotnet tool restore
 
       # 2. Run the Migration
       # We verify the build first, then apply the migration to the DB

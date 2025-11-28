@@ -19,6 +19,17 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with: { dotnet-version: 8.0.x }
+
+
+      - name: Debug Secret
+        run: |
+          if [ -z "$MY_SECRET" ]; then
+            echo "❌ SECRET IS EMPTY"
+          else
+            echo "✅ Secret is found (length: ${#MY_SECRET})"
+          fi
+        env:
+          MY_SECRET: ${{ secrets.SUPABASE_CONNECTION_STRING_MIGRATION }}
       
       - name: Build & Test
         run: |
@@ -44,4 +55,5 @@ jobs:
       - name: Trigger Render Deploy
         if: success()
         run: curl "${{ secrets.RENDER_DEPLOY_HOOK }}"
+      
 

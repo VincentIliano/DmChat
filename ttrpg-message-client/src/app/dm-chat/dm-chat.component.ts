@@ -36,6 +36,10 @@ export class DmChatComponent implements OnInit {
     this.signalrService.messageReceived.subscribe((data: any) => {
       this.handleIncomingMessage(data);
     });
+
+    this.signalrService.playerJoined.subscribe((player: any) => {
+      this.handlePlayerJoined(player);
+    });
   }
 
   loadPlayers() {
@@ -49,6 +53,17 @@ export class DmChatComponent implements OnInit {
         }
       });
     });
+  }
+
+  handlePlayerJoined(player: { id: number, characterName: string }) {
+    // Check if player already exists
+    if (!this.players.some(p => p.id === player.id)) {
+      this.players.push(player);
+      if (!this.chats[player.id]) {
+        this.chats[player.id] = [];
+        this.unreadCounts[player.id] = 0;
+      }
+    }
   }
 
   handleIncomingMessage(data: { user: string, message: string, playerId: number, isFromDm: boolean }) {

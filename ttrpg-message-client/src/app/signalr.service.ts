@@ -8,6 +8,7 @@ import { Subject } from 'rxjs';
 export class SignalrService {
   private hubConnection: signalR.HubConnection;
   public messageReceived = new Subject<{ user: string, message: string, playerId: number, isFromDm: boolean }>();
+  public playerJoined = new Subject<{ id: number, characterName: string }>();
 
   constructor() {
     this.hubConnection = new signalR.HubConnectionBuilder()
@@ -46,6 +47,10 @@ export class SignalrService {
   public addMessageListener = () => {
     this.hubConnection.on('ReceiveMessage', (user, message, playerId, isFromDm) => {
       this.messageReceived.next({ user, message, playerId, isFromDm });
+    });
+
+    this.hubConnection.on('PlayerJoined', (data: { id: number, characterName: string }) => {
+      this.playerJoined.next(data);
     });
   }
 

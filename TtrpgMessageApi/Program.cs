@@ -71,7 +71,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policyBuilder =>
     {
-        policyBuilder.WithOrigins("http://localhost:4200", "https://dm-chat-rmqcr8lco-vincents-projects-838544f9.vercel.app/")
+        policyBuilder.WithOrigins("http://localhost:4200", "https://dm-chat-rmqcr8lco-vincents-projects-838544f9.vercel.app")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();

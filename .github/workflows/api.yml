@@ -3,6 +3,13 @@ on:
   push:
     branches: [ "main" ]
     paths: [ "TtrpgMessageApi/**" ] # Only run if API code changes
+  workflow_dispatch:      # <--- ADD THIS LINE
+    inputs:               # (Optional) Add inputs if you want options
+      force_deploy:
+        description: 'Force deploy without running tests?'
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   deploy-api:

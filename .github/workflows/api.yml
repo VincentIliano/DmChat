@@ -26,6 +26,22 @@ jobs:
           dotnet build --no-restore
           dotnet test --no-build
 
+      # 1. Install the EF Core Tool (It's not installed by default on runners)
+      - name: Install EF Core Tool
+        run: dotnet tool install --global dotnet-ef
+
+      # 2. Run the Migration
+      # We verify the build first, then apply the migration to the DB
+      - name: Apply EF Core Migrations
+        run: |
+          dotnet restore
+          dotnet ef database update --connection "${{ secrets.SUPABASE_CONNECTION_STRING_MIGRATION }}"
+        env:
+          # If your DbContext uses a different env var name, change this!
+          ConnectionStrings__DefaultConnection: ${{ secrets.SUPABASE_CONNECTION_STRING_MIGRATION }}
+
+      # 3. Trigger Render Deploy (Only if migrations succeeded)
       - name: Trigger Render Deploy
         if: success()
         run: curl "${{ secrets.RENDER_DEPLOY_HOOK }}"
+

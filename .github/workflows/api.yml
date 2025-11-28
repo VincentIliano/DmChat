@@ -1,0 +1,24 @@
+name: API Pipeline
+on:
+  push:
+    branches: [ "main" ]
+    paths: [ "TtrpgMessageApi/**" ] # Only run if API code changes
+
+jobs:
+  deploy-api:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: ./TtrpgMessageApi } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: 8.0.x }
+      
+      - name: Build & Test
+        run: |
+          dotnet restore
+          dotnet build --no-restore
+          dotnet test --no-build
+
+      - name: Trigger Render Deploy
+        if: success()
+        run: curl "${{ secrets.RENDER_DEPLOY_HOOK }}"

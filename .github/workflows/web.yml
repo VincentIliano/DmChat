@@ -38,7 +38,6 @@ jobs:
   deploy-vercel:
     needs: test-web
     runs-on: ubuntu-latest
-    defaults: { run: { working-directory: ./ttrpg-message-client } }
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
@@ -50,18 +49,22 @@ jobs:
           cache-dependency-path: ttrpg-message-client/package-lock.json
       
       - name: Install Dependencies
+        working-directory: ./ttrpg-message-client
         run: npm ci
 
       - name: Build for Production
+        working-directory: ./ttrpg-message-client
         run: npm run build
         env:
           NODE_ENV: production
 
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
       - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
-          working-directory: ./ttrpg-message-client
+        working-directory: ./ttrpg-message-client
+        run: |
+          vercel --prod --yes --token ${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}

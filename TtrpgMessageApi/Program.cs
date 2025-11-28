@@ -101,5 +101,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<ChatHub>("/chathub");
+app.MapGet("/", () => "TTRPG Message API is running!");
 
 app.Run();

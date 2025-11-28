@@ -35,8 +35,24 @@ This project is configured to automatically deploy to Vercel when changes are pu
 2. Tests are executed first (`test-web` job)
 3. If tests pass, the `deploy-vercel` job:
    - Builds the Angular app with production configuration
+   - Removes any cached Vercel configuration
+   - Updates Vercel project root directory to `ttrpg-message-client` (via API)
+   - Links the project to Vercel
    - Deploys to Vercel using the Vercel CLI
    - The production environment file is automatically used via `fileReplacements` in `angular.json`
+
+### Troubleshooting: Root Directory Error
+
+If you see an error like "The provided path does not exist", it means Vercel's project settings have the wrong root directory. Fix it by:
+
+1. **Automatic Fix (via workflow)**: The workflow tries to update this automatically via API
+2. **Manual Fix (if automatic fails)**:
+   - Go to [Vercel Dashboard](https://vercel.com/dashboard)
+   - Navigate to your project → **Settings** → **General**
+   - Find the **Root Directory** field
+   - Set it to: `ttrpg-message-client`
+   - Save the changes
+   - Re-run the GitHub Actions workflow
 
 ### Manual Deployment
 

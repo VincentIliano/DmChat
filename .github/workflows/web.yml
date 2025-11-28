@@ -61,6 +61,26 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
+      - name: Remove cached Vercel config
+        working-directory: ./ttrpg-message-client
+        run: |
+          rm -rf .vercel || true
+
+      - name: Update Vercel project root directory
+        run: |
+          curl -X PATCH "https://api.vercel.com/v9/projects/${{ secrets.VERCEL_PROJECT_ID }}?teamId=${{ secrets.VERCEL_ORG_ID }}" \
+            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"rootDirectory": "ttrpg-message-client"}' || echo "Note: Project root directory update may require manual configuration in Vercel dashboard"
+
+      - name: Link Vercel project
+        working-directory: ./ttrpg-message-client
+        run: |
+          vercel link --yes --token ${{ secrets.VERCEL_TOKEN }} --project ${{ secrets.VERCEL_PROJECT_ID }} --scope ${{ secrets.VERCEL_ORG_ID }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
       - name: Deploy to Vercel
         working-directory: ./ttrpg-message-client
         run: |

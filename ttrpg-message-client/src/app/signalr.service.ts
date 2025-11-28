@@ -15,6 +15,7 @@ export class SignalrService {
       .withUrl('https://localhost:7038/chathub', {
         accessTokenFactory: () => localStorage.getItem('token') || ''
       })
+      .withAutomaticReconnect() // Enable automatic reconnect
       .build();
   }
 
@@ -60,6 +61,6 @@ export class SignalrService {
       // Backend: SendMessage(string sessionId, string message, int targetPlayerId)
 
       this.hubConnection.invoke('SendMessage', sessionId, message, playerId)
-        .catch(err => console.error(err));
+        .catch(err => console.error('Error sending message:', err));
   }
 }

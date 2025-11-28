@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { SignalrService } from '../signalr.service';
 import { SessionService } from '../session.service';
@@ -23,35 +23,50 @@ export class DmChatComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private signalrService: SignalrService,
-    private sessionService: SessionService
+    private sessionService: SessionService,
+    private ngZone: NgZone
   ) { }
 
   ngOnInit(): void {
     this.sessionId = this.route.snapshot.paramMap.get('sessionId')!;
+    if (!this.sessionId) {
+      console.error('Session ID not found in route parameters');
+      return;
+    }
+
     this.loadPlayers();
 
     this.signalrService.startDmConnection(this.sessionId);
     this.signalrService.addMessageListener();
 
     this.signalrService.messageReceived.subscribe((data: any) => {
-      this.handleIncomingMessage(data);
+      this.ngZone.run(() => {
+        this.handleIncomingMessage(data);
+      });
     });
 
     this.signalrService.playerJoined.subscribe((player: any) => {
-      this.handlePlayerJoined(player);
+      this.ngZone.run(() => {
+        this.handlePlayerJoined(player);
+      });
     });
   }
 
   loadPlayers() {
-    this.sessionService.getPlayers(+this.sessionId).subscribe((data: any) => {
-      this.players = data;
-      // Initialize chat buffers for all players
-      this.players.forEach(p => {
-        if (!this.chats[p.id]) {
-          this.chats[p.id] = [];
-          this.unreadCounts[p.id] = 0;
-        }
-      });
+    this.sessionService.getPlayers(+this.sessionId).subscribe({
+      next: (data: any) => {
+        this.players = data;
+        // Initialize chat buffers for all players
+        this.players.forEach(p => {
+          if (!this.chats[p.id]) {
+            this.chats[p.id] = [];
+            this.unreadCounts[p.id] = 0;
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Error loading players:', err);
+      }
     });
   }
 

@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TtrpgMessageApi", "TtrpgMessageApi\TtrpgMessageApi.csproj", "{B3A847AC-4EF1-4457-BD8C-A03AEC1829B3}"
 EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "ttrpg-message-client", "ttrpg-message-client\ttrpg-message-client.esproj", "{70260492-3580-4D3B-B03C-92040685E65C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{B3A847AC-4EF1-4457-BD8C-A03AEC1829B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3A847AC-4EF1-4457-BD8C-A03AEC1829B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3A847AC-4EF1-4457-BD8C-A03AEC1829B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70260492-3580-4D3B-B03C-92040685E65C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70260492-3580-4D3B-B03C-92040685E65C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70260492-3580-4D3B-B03C-92040685E65C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70260492-3580-4D3B-B03C-92040685E65C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

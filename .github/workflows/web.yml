@@ -1,0 +1,19 @@
+name: Web Pipeline
+on:
+  push:
+    branches: [ "main" ]
+    paths: [ "ttrpg-message-client/**" ]
+
+jobs:
+  test-web:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: ./ttrpg-message-client } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm', cache-dependency-path: web/package-lock.json }
+      
+      - name: Install & Test
+        run: |
+          npm ci
+          npx ng test --watch=false --browsers=ChromeHeadless

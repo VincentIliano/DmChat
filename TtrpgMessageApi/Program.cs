@@ -20,6 +20,14 @@ builder.Services.AddControllers();
 var appSettingsSection = builder.Configuration.GetSection("AppSettings");
 builder.Services.Configure<AppSettings>(appSettingsSection);
 var appSettings = appSettingsSection.Get<AppSettings>();
+if (appSettings == null)
+{
+    throw new Exception("AppSettings section is missing or invalid in configuration.");
+}
+if (string.IsNullOrEmpty(appSettings.Secret))
+{
+    throw new Exception("Secret is missing in AppSettings.");
+}
 var key = Encoding.ASCII.GetBytes(appSettings.Secret);
 builder.Services.AddAuthentication(x =>
 {

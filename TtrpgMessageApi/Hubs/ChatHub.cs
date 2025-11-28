@@ -71,6 +71,9 @@ namespace TtrpgMessageApi.Hubs
                 {
                     await Clients.Caller.SendAsync("ReceiveMessage", msg.user, msg.message, playerId, msg.isFromDm);
                 }
+
+                // Notify DM
+                await Clients.Group($"Session_{sessionId}_DM").SendAsync("PlayerJoined", new { id = player.Id, characterName = player.Character.Name });
             }
             else
             {

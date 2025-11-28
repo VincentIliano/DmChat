@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class SessionService {
-  private baseUrl = 'https://localhost:7038/api/session';
+  private baseUrl = 'https://dmchat-099d.onrender.com/api/session';
 
   constructor(private http: HttpClient) { }
 

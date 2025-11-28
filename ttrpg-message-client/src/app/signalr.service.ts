@@ -12,7 +12,7 @@ export class SignalrService {
 
   constructor() {
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl('https://localhost:7038/chathub', {
+      .withUrl('https://dmchat-099d.onrender.com/chathub', {
         accessTokenFactory: () => localStorage.getItem('token') || ''
       })
       .withAutomaticReconnect() // Enable automatic reconnect

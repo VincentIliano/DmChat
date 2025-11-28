@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'https://localhost:7038/api/auth';
+  private baseUrl = 'https://dmchat-099d.onrender.com/api/auth';
 
   constructor(private http: HttpClient) { }
 

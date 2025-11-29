@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { SignalrService } from '../signalr.service';
 import { SessionService } from '../session.service';
@@ -23,7 +23,8 @@ export class DmChatComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private signalrService: SignalrService,
-    private sessionService: SessionService
+    private sessionService: SessionService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -33,18 +34,22 @@ export class DmChatComponent implements OnInit {
       return;
     }
 
-    this.loadPlayers();
-
-    this.signalrService.startDmConnection(this.sessionId);
-    this.signalrService.addMessageListener();
-
+    // Set up subscriptions FIRST before starting connection
     this.signalrService.messageReceived.subscribe((data: any) => {
+      console.log('DM Chat: Message received subscription triggered', data);
       this.handleIncomingMessage(data);
     });
 
     this.signalrService.playerJoined.subscribe((player: any) => {
+      console.log('DM Chat: Player joined subscription triggered', player);
       this.handlePlayerJoined(player);
     });
+
+    // Load players and start SignalR connection
+    this.loadPlayers();
+    
+    // Start DM connection (listeners are already registered in service constructor)
+    this.signalrService.startDmConnection(this.sessionId);
   }
 
   loadPlayers() {
@@ -60,6 +65,7 @@ export class DmChatComponent implements OnInit {
             this.unreadCounts[p.id] = 0;
           }
         });
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading players:', err);
@@ -71,11 +77,13 @@ export class DmChatComponent implements OnInit {
     console.log('Player joined:', player);
     // Check if player already exists
     if (!this.players.some(p => p.id === player.id)) {
-      this.players.push(player);
+      this.players = [...this.players, player]; // Create new array reference for change detection
       if (!this.chats[player.id]) {
         this.chats[player.id] = [];
         this.unreadCounts[player.id] = 0;
       }
+      console.log('Updated players array:', this.players);
+      this.cdr.detectChanges();
     }
   }
 
@@ -87,7 +95,8 @@ export class DmChatComponent implements OnInit {
       this.unreadCounts[pId] = 0;
     }
 
-    this.chats[pId].push(data);
+    // Create new array reference for change detection
+    this.chats[pId] = [...this.chats[pId], data];
 
     // If we are not currently viewing this player, increment unread
     // If we are viewing them, we don't need to increment.
@@ -95,6 +104,9 @@ export class DmChatComponent implements OnInit {
     if (!data.isFromDm && this.selectedPlayerId !== pId) {
         this.unreadCounts[pId] = (this.unreadCounts[pId] || 0) + 1;
     }
+    
+    console.log('Updated chats for player', pId, ':', this.chats[pId]);
+    this.cdr.detectChanges();
   }
 
   selectPlayer(playerId: number) {
@@ -118,11 +130,29 @@ export class DmChatComponent implements OnInit {
 
   getMessagesForSelectedPlayer() {
     if (!this.selectedPlayerId) return [];
-    return this.chats[this.selectedPlayerId] || [];
+    const messages = this.chats[this.selectedPlayerId] || [];
+    // Auto-scroll to bottom after a brief delay to allow DOM update
+    setTimeout(() => this.scrollToBottom(), 100);
+    return messages;
+  }
+
+  private scrollToBottom() {
+    const chatContainer = document.querySelector('.card-body[style*="overflow-y"]');
+    if (chatContainer) {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
   }
 
   getSelectedPlayerName(): string {
     const player = this.players.find(p => p.id === this.selectedPlayerId);
     return player ? player.characterName : '';
+  }
+
+  trackByPlayerId(index: number, player: any): number {
+    return player.id;
+  }
+
+  trackByMessageIndex(index: number, msg: any): number {
+    return index;
   }
 }

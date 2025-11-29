@@ -105,6 +105,21 @@ namespace TtrpgMessageApi.Hubs
 
             await Groups.AddToGroupAsync(Context.ConnectionId, $"Session_{sessionId}_DM");
 
+            // Send existing connected players to DM
+            var existingPlayers = await _context.Players
+                .Where(p => p.SessionId == sId && !string.IsNullOrEmpty(p.ConnectionId))
+                .Include(p => p.Character)
+                .Select(p => new { id = p.Id, characterName = p.Character.Name })
+                .ToListAsync();
+
+            Console.WriteLine($"[RegisterDmConnection] Found {existingPlayers.Count} connected players for Session {sessionId}");
+
+            foreach (var player in existingPlayers)
+            {
+                await Clients.Caller.SendAsync("PlayerJoined", new { id = player.id, characterName = player.characterName });
+            }
+
+            // Load and send message history
             var messages = await _context.Messages
                 .AsNoTracking()
                 .Where(m => m.SessionId == sId)
@@ -116,6 +131,8 @@ namespace TtrpgMessageApi.Hubs
                     isFromDm = m.IsFromDm
                 })
                 .ToListAsync();
+
+            Console.WriteLine($"[RegisterDmConnection] Sending {messages.Count} messages to DM for Session {sessionId}");
 
             foreach (var msg in messages)
             {

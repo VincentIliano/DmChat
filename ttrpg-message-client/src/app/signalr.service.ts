@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { Subject } from 'rxjs';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -9,14 +10,19 @@ export class SignalrService {
   private hubConnection: signalR.HubConnection;
   public messageReceived = new Subject<{ user: string, message: string, playerId: number, isFromDm: boolean }>();
   public playerJoined = new Subject<{ id: number, characterName: string }>();
+  private listenersRegistered = false;
 
   constructor() {
+    const hubUrl = environment.apiUrl.replace('/api', '/chathub');
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl('https://dmchat-099d.onrender.com/chathub', {
+      .withUrl(hubUrl, {
         accessTokenFactory: () => localStorage.getItem('token') || ''
       })
       .withAutomaticReconnect() // Enable automatic reconnect
       .build();
+    
+    // Register listeners once when service is created
+    this.registerListeners();
   }
 
   public startConnection = (sessionId: string, playerId: number) => {
@@ -45,15 +51,39 @@ export class SignalrService {
       }
       if (this.hubConnection.state === signalR.HubConnectionState.Disconnected) {
           console.log('Hub disconnected, starting...');
+          // Ensure listeners are registered before starting
+          this.registerListeners();
           return this.hubConnection.start()
-            .then(() => console.log('Hub started'));
+            .then(() => {
+              console.log('Hub started successfully');
+              console.log('Connection state:', this.hubConnection.state);
+            })
+            .catch(err => {
+              console.error('Hub start failed:', err);
+              throw err;
+            });
       }
-      // If connecting, wait a bit or reject? For now, we assume simple retry or let the caller handle it.
-      // A robust implementation would wait for the connecting state to resolve.
-      return Promise.reject('Connection is in intermediate state: ' + this.hubConnection.state);
+      // If connecting, wait for it to complete
+      if (this.hubConnection.state === signalR.HubConnectionState.Connecting) {
+          return new Promise((resolve, reject) => {
+              const checkState = () => {
+                  if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
+                      resolve();
+                  } else if (this.hubConnection.state === signalR.HubConnectionState.Disconnected) {
+                      reject('Connection failed');
+                  } else {
+                      setTimeout(checkState, 100);
+                  }
+              };
+              checkState();
+          });
+      }
+      return Promise.reject('Connection is in unexpected state: ' + this.hubConnection.state);
   }
 
-  public addMessageListener = () => {
+  private registerListeners = () => {
+    if (this.listenersRegistered) return;
+    
     this.hubConnection.on('ReceiveMessage', (user, message, playerId, isFromDm) => {
       console.log('SignalR ReceiveMessage:', user, message, playerId, isFromDm);
       this.messageReceived.next({ user, message, playerId, isFromDm });
@@ -63,6 +93,14 @@ export class SignalrService {
       console.log('SignalR PlayerJoined:', data);
       this.playerJoined.next(data);
     });
+    
+    this.listenersRegistered = true;
+  }
+
+  public addMessageListener = () => {
+    // Deprecated: Listeners are now registered automatically
+    // Kept for backward compatibility
+    this.registerListeners();
   }
 
   public sendMessage = (sessionId: string, user: string, message: string, playerId: number, isDm: boolean) => {

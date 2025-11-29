@@ -8,7 +8,7 @@
         </div>
         <div class="list-group list-group-flush">
           <button
-            *ngFor="let player of players"
+            *ngFor="let player of players; trackBy: trackByPlayerId"
             class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
             [class.active]="player.id === selectedPlayerId"
             (click)="selectPlayer(player.id)">
@@ -31,8 +31,8 @@
             <input type="text" class="form-control form-control-sm" [(ngModel)]="dmName">
           </div>
         </div>
-        <div class="card-body" style="height: 400px; overflow-y: auto;">
-          <div *ngFor="let msg of getMessagesForSelectedPlayer()" class="mb-2">
+        <div class="card-body" style="height: 400px; overflow-y: auto;" #chatContainer>
+          <div *ngFor="let msg of getMessagesForSelectedPlayer(); trackBy: trackByMessageIndex" class="mb-2">
             <div [ngClass]="{'text-right': msg.isFromDm, 'text-left': !msg.isFromDm}">
               <strong>{{ msg.user }}:</strong> {{ msg.message }}
             </div>

@@ -140,7 +140,7 @@ namespace TtrpgMessageApi.Hubs
             }
         }
 
-        public async Task SendMessage(string sessionId, string message, int targetPlayerId)
+        public async Task SendMessage(string sessionId, string message, int targetPlayerId, string customSenderName = null)
         {
             if (!int.TryParse(sessionId, out int sId)) throw new HubException("Invalid Session ID");
 
@@ -160,7 +160,8 @@ namespace TtrpgMessageApi.Hubs
                 if (session != null && session.DMId == dmId)
                 {
                     isDm = true;
-                    senderName = "DM"; // Or get from DM profile
+                    // Use custom sender name if provided, otherwise default to "DM"
+                    senderName = !string.IsNullOrWhiteSpace(customSenderName) ? customSenderName : "DM";
                     // Target player ID is valid context for DM sending TO a player
                 }
                 else

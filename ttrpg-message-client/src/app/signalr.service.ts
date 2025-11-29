@@ -104,11 +104,11 @@ export class SignalrService {
   }
 
   public sendMessage = (sessionId: string, user: string, message: string, playerId: number, isDm: boolean) => {
-      // Logic fix: The backend now determines user/isDm. We just send content and target.
-      // But we need to match the backend signature.
-      // Backend: SendMessage(string sessionId, string message, int targetPlayerId)
-
-      this.hubConnection.invoke('SendMessage', sessionId, message, playerId)
+      // Backend signature: SendMessage(string sessionId, string message, int targetPlayerId, string customSenderName = null)
+      // For DMs, pass the custom sender name (user parameter). For players, it's ignored.
+      const customName = isDm ? user : null;
+      
+      this.hubConnection.invoke('SendMessage', sessionId, message, playerId, customName)
         .catch(err => console.error('Error sending message:', err));
   }
 }

@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { SignalrService } from '../signalr.service';
 import { SessionService } from '../session.service';
+import { ThemeService, Theme } from '../theme.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -19,11 +20,18 @@ export class DmChatComponent implements OnInit {
   unreadCounts: { [playerId: number]: number } = {};
   newMessage = '';
   dmName = 'DM';
+  selectedTheme: Theme = 'neutral';
+  themes: { value: Theme; label: string }[] = [
+    { value: 'neutral', label: 'Neutral' },
+    { value: 'paranoia', label: 'Paranoia XP' },
+    { value: 'dnd', label: 'Dungeons & Dragons' }
+  ];
 
   constructor(
     private route: ActivatedRoute,
     private signalrService: SignalrService,
     private sessionService: SessionService,
+    private themeService: ThemeService,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -33,6 +41,11 @@ export class DmChatComponent implements OnInit {
       console.error('Session ID not found in route parameters');
       return;
     }
+
+    // Load theme for this session
+    const sessionIdNum = parseInt(this.sessionId, 10);
+    this.selectedTheme = this.themeService.getSessionTheme(sessionIdNum);
+    this.themeService.setSessionTheme(sessionIdNum, this.selectedTheme);
 
     // Set up subscriptions FIRST before starting connection
     this.signalrService.messageReceived.subscribe((data: any) => {
@@ -50,6 +63,11 @@ export class DmChatComponent implements OnInit {
     
     // Start DM connection (listeners are already registered in service constructor)
     this.signalrService.startDmConnection(this.sessionId);
+  }
+
+  onThemeChange(): void {
+    const sessionIdNum = parseInt(this.sessionId, 10);
+    this.themeService.setSessionTheme(sessionIdNum, this.selectedTheme);
   }
 
   loadPlayers() {

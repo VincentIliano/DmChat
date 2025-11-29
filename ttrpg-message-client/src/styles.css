@@ -1,1 +1,413 @@
-/* You can add global styles to this file, and also import other style files */
+/* Base styles - Neutral theme by default */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #17a2b8;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+  --bg-color: #ffffff;
+  --text-color: #212529;
+  --border-color: #dee2e6;
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  background: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Neutral Theme (Default) */
+body.theme-neutral {
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #17a2b8;
+  --bg-color: #ffffff;
+  --text-color: #212529;
+  --border-color: #dee2e6;
+  --card-bg: #ffffff;
+  --input-bg: #ffffff;
+}
+
+/* Paranoia Theme */
+body.theme-paranoia {
+  --primary-color: #00ff00;
+  --secondary-color: #ffff00;
+  --success-color: #39ff14;
+  --danger-color: #ff0000;
+  --warning-color: #ffff00;
+  --info-color: #00ffff;
+  --bg-color: #000000;
+  --text-color: #00ff00;
+  --border-color: #00ff00;
+  --card-bg: #0a0a0a;
+  --input-bg: #000000;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+body.theme-paranoia::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(transparent 50%, rgba(0, 255, 0, 0.03) 50%);
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 10000;
+  animation: scanline 8s linear infinite;
+}
+
+@keyframes scanline {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(4px); }
+}
+
+/* D&D Theme */
+body.theme-dnd {
+  --primary-color: #8b4513;
+  --secondary-color: #654321;
+  --success-color: #228b22;
+  --danger-color: #8b0000;
+  --warning-color: #daa520;
+  --info-color: #4169e1;
+  --bg-color: #2c1810;
+  --text-color: #f4e4bc;
+  --border-color: #8b4513;
+  --card-bg: #3d2817;
+  --input-bg: #2c1810;
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(34, 139, 34, 0.1) 0%, transparent 50%);
+  background-attachment: fixed;
+}
+
+/* Common Styles */
+.card {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-color) !important;
+  transition: all 0.3s ease;
+}
+
+.card-header {
+  background: var(--card-bg) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  color: var(--text-color) !important;
+}
+
+.card-body {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+}
+
+.card-footer {
+  background: var(--card-bg) !important;
+  border-top: 1px solid var(--border-color) !important;
+}
+
+.btn {
+  border: 1px solid !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-primary {
+  background: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: #ffffff !important;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background: var(--success-color) !important;
+  border-color: var(--success-color) !important;
+  color: #ffffff !important;
+}
+
+.btn-secondary {
+  background: var(--secondary-color) !important;
+  border-color: var(--secondary-color) !important;
+  color: #ffffff !important;
+}
+
+.form-control {
+  background: var(--input-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-color) !important;
+}
+
+.form-control:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.25);
+  outline: none !important;
+}
+
+select.form-control {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23000' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 30px;
+}
+
+body.theme-paranoia select.form-control {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300ff00' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+}
+
+body.theme-dnd select.form-control {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23daa520' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+}
+
+.alert {
+  border: 1px solid !important;
+}
+
+.alert-danger {
+  background: rgba(220, 53, 69, 0.1) !important;
+  border-color: var(--danger-color) !important;
+  color: var(--danger-color) !important;
+}
+
+.alert-info {
+  background: rgba(23, 162, 184, 0.1) !important;
+  border-color: var(--info-color) !important;
+  color: var(--info-color) !important;
+}
+
+.alert-success {
+  background: rgba(40, 167, 69, 0.1) !important;
+  border-color: var(--success-color) !important;
+  color: var(--success-color) !important;
+}
+
+.list-group-item {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-color) !important;
+}
+
+.list-group-item:hover {
+  background: var(--bg-color) !important;
+}
+
+.list-group-item.active {
+  background: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: #ffffff !important;
+}
+
+/* Paranoia-specific enhancements */
+body.theme-paranoia .card {
+  border: 2px solid var(--primary-color) !important;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+}
+
+body.theme-paranoia h1, 
+body.theme-paranoia h2, 
+body.theme-paranoia h3, 
+body.theme-paranoia h4, 
+body.theme-paranoia h5, 
+body.theme-paranoia h6 {
+  color: var(--success-color);
+  text-shadow: 0 0 5px var(--primary-color);
+  letter-spacing: 2px;
+}
+
+body.theme-paranoia .btn {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border-radius: 0 !important;
+}
+
+body.theme-paranoia .form-control {
+  border-radius: 0 !important;
+  box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.2);
+}
+
+body.theme-paranoia .message {
+  border-left: 3px solid var(--primary-color);
+  background: rgba(0, 255, 0, 0.05);
+}
+
+body.theme-paranoia .message::before {
+  content: '> ';
+  color: var(--success-color);
+  font-weight: bold;
+}
+
+/* D&D-specific enhancements */
+body.theme-dnd .card {
+  border: 2px solid var(--border-color) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  background-image: 
+    linear-gradient(135deg, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
+    linear-gradient(225deg, rgba(34, 139, 34, 0.1) 0%, transparent 50%);
+}
+
+body.theme-dnd h1, 
+body.theme-dnd h2, 
+body.theme-dnd h3, 
+body.theme-dnd h4, 
+body.theme-dnd h5, 
+body.theme-dnd h6 {
+  color: var(--warning-color);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  font-weight: 600;
+}
+
+body.theme-dnd .btn {
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+body.theme-dnd .form-control {
+  border-radius: 4px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+body.theme-dnd .message {
+  border-left: 4px solid var(--primary-color);
+  background: rgba(139, 69, 19, 0.1);
+  border-radius: 4px;
+  padding: 12px;
+  margin: 8px 0;
+}
+
+body.theme-dnd .badge {
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border: 1px solid var(--border-color);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary-color);
+}
+
+/* Modal */
+.modal-content {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-color) !important;
+}
+
+.modal-header {
+  background: var(--card-bg) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.modal-body {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+}
+
+.modal-footer {
+  background: var(--card-bg) !important;
+  border-top: 1px solid var(--border-color) !important;
+}
+
+/* Message container */
+.message-container {
+  background: var(--card-bg);
+  padding: 15px;
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+}
+
+.message {
+  padding: 10px;
+  margin: 5px 0;
+  font-family: inherit;
+}
+
+.message strong {
+  color: var(--primary-color);
+}
+
+.text-right .message {
+  border-right: 3px solid var(--info-color);
+  background: rgba(23, 162, 184, 0.1);
+}
+
+.text-left .message {
+  border-left: 3px solid var(--primary-color);
+  background: rgba(0, 123, 255, 0.1);
+}
+
+/* Input group */
+.input-group {
+  border: 1px solid var(--border-color);
+}
+
+.input-group-append .btn {
+  border-left: 1px solid var(--border-color) !important;
+}
+
+/* Labels */
+label {
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+/* Links */
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+/* Badges */
+.badge {
+  padding: 5px 10px;
+  border: 1px solid;
+}
+
+.bg-danger {
+  background: var(--danger-color) !important;
+  border-color: var(--danger-color) !important;
+  color: #ffffff !important;
+}

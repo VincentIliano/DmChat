@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SignalrService } from '../signalr.service';
+import { ThemeService } from '../theme.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -21,11 +22,20 @@ export class ChatComponent implements OnInit {
     private signalrService: SignalrService, 
     private route: ActivatedRoute, 
     private router: Router,
+    private themeService: ThemeService,
     private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
     this.sessionId = this.route.snapshot.paramMap.get('sessionId')!;
+    
+    // Load theme for this session
+    const sessionIdNum = parseInt(this.sessionId, 10);
+    if (!isNaN(sessionIdNum)) {
+      const sessionTheme = this.themeService.getSessionTheme(sessionIdNum);
+      this.themeService.setTheme(sessionTheme, true);
+    }
+    
     this.route.queryParams.subscribe(params => {
         let playerIdParam = params['playerId'];
         let characterNameParam = params['characterName'];

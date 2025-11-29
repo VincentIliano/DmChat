@@ -24,11 +24,19 @@
     <!-- Main Area: Chat -->
     <div class="col-md-9">
       <div class="card" *ngIf="selectedPlayerId; else noSelection">
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
           <h5>Chat with {{ getSelectedPlayerName() }}</h5>
-          <div class="form-inline">
-            <label class="mr-2">Chat as: </label>
-            <input type="text" class="form-control form-control-sm" [(ngModel)]="dmName">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <div class="form-inline">
+              <label class="mr-2">Theme: </label>
+              <select class="form-control form-control-sm" [(ngModel)]="selectedTheme" (change)="onThemeChange()" name="theme">
+                <option *ngFor="let theme of themes" [value]="theme.value">{{ theme.label }}</option>
+              </select>
+            </div>
+            <div class="form-inline">
+              <label class="mr-2">Chat as: </label>
+              <input type="text" class="form-control form-control-sm" [(ngModel)]="dmName" name="dmName">
+            </div>
           </div>
         </div>
         <div class="card-body" style="height: 400px; overflow-y: auto;" #chatContainer>

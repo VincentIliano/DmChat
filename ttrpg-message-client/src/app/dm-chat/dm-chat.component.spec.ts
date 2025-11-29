@@ -3,6 +3,7 @@ import { DmChatComponent } from './dm-chat.component';
 import { SessionService } from '../session.service';
 import { SignalrService } from '../signalr.service';
 import { ActivatedRoute } from '@angular/router';
+import { ChangeDetectorRef } from '@angular/core';
 import { of, Subject, throwError } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -42,7 +43,8 @@ describe('DmChatComponent', () => {
           useValue: {
             snapshot: { paramMap: { get: () => '1' } }
           }
-        }
+        },
+        { provide: ChangeDetectorRef, useValue: { detectChanges: vi.fn() } }
       ]
     }).compileComponents();
 
@@ -63,8 +65,10 @@ describe('DmChatComponent', () => {
   });
 
   it('should start DM connection and add listeners on init', () => {
+    // Component initialization happens in ngOnInit which is called by detectChanges in beforeEach
+    // The startDmConnection should have been called during component initialization
     expect(mockSignalrService.startDmConnection).toHaveBeenCalledWith('1');
-    expect(mockSignalrService.addMessageListener).toHaveBeenCalled();
+    // Note: addMessageListener is no longer called explicitly as listeners are registered in service constructor
   });
 
   it('should handle player joined event', () => {

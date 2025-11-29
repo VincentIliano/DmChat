@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SignalrService } from '../signalr.service';
 import { FormsModule } from '@angular/forms';
@@ -17,7 +17,12 @@ export class ChatComponent implements OnInit {
   sessionId: string = '';
   playerId: number = 0;
 
-  constructor(private signalrService: SignalrService, private route: ActivatedRoute, private router: Router) { }
+  constructor(
+    private signalrService: SignalrService, 
+    private route: ActivatedRoute, 
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
     this.sessionId = this.route.snapshot.paramMap.get('sessionId')!;
@@ -54,10 +59,13 @@ export class ChatComponent implements OnInit {
             this.signalrService.startConnection(this.sessionId, this.playerId);
             this.signalrService.addMessageListener();
             this.signalrService.messageReceived.subscribe((data: any) => {
-              // Push the message object directly.
+              // Create new array reference for change detection
               // The backend now sends { user, message, playerId, isFromDm }
               // The Chat component expects { user, message } which is compatible.
-              this.messages.push(data);
+              this.messages = [...this.messages, data];
+              this.cdr.detectChanges();
+              // Auto-scroll to bottom after message is added
+              setTimeout(() => this.scrollToBottom(), 100);
             });
         } else {
             // No player ID found in URL or Storage - redirect to join
@@ -71,6 +79,14 @@ export class ChatComponent implements OnInit {
         // Updated signature: user and isDm are ignored by service/backend
         this.signalrService.sendMessage(this.sessionId, this.user, this.newMessage, this.playerId, false);
         this.newMessage = '';
+        this.cdr.detectChanges();
+    }
+  }
+
+  private scrollToBottom() {
+    const messageContainer = document.querySelector('.message-container');
+    if (messageContainer) {
+      messageContainer.scrollTop = messageContainer.scrollHeight;
     }
   }
 }

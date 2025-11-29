@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { SessionService } from '../session.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -15,23 +15,36 @@ export class DmDashboardComponent implements OnInit {
   sessions: any[] = [];
   errorMessage: string = '';
   showCreateSessionModal = false;
+  isLoading = false;
 
-  constructor(private sessionService: SessionService, private router: Router) { }
+  constructor(
+    private sessionService: SessionService, 
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit() {
     this.loadSessions();
   }
 
   loadSessions() {
+    console.log('Loading sessions...');
+    this.isLoading = true;
     this.sessionService.getSessions()
       .subscribe({
         next: (response: any) => {
-          this.sessions = response;
+          console.log('Sessions loaded:', response);
+          this.sessions = Array.isArray(response) ? response : [];
           this.errorMessage = '';
+          this.isLoading = false;
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Failed to load sessions', err);
           this.errorMessage = 'Failed to load sessions. Please try logging in again.';
+          this.sessions = [];
+          this.isLoading = false;
+          this.cdr.detectChanges();
         }
       });
   }
@@ -46,6 +59,8 @@ export class DmDashboardComponent implements OnInit {
     this.showCreateSessionModal = false;
     this.errorMessage = '';
     this.sessionName = '';
+    // Reload sessions when modal closes in case a new one was created elsewhere
+    this.loadSessions();
   }
 
   onSubmit() {

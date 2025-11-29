@@ -8,7 +8,11 @@
     {{ errorMessage }}
   </div>
 
-  <div class="row" *ngIf="sessions.length > 0; else noSessions">
+  <div *ngIf="isLoading" class="text-center">
+    <p>Loading sessions...</p>
+  </div>
+
+  <div class="row" *ngIf="!isLoading && sessions.length > 0">
     <div class="col-md-4 mb-4" *ngFor="let session of sessions">
       <div class="card h-100">
         <div class="card-body">
@@ -20,11 +24,9 @@
     </div>
   </div>
 
-  <ng-template #noSessions>
-    <div class="alert alert-info">
-      You have no active sessions. Create one to get started!
-    </div>
-  </ng-template>
+  <div *ngIf="!isLoading && sessions.length === 0" class="alert alert-info">
+    You have no active sessions. Create one to get started!
+  </div>
 </div>
 
 <!-- Modal Overlay -->
